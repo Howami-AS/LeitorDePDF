@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor Inteligente</title>
+    <meta name="description" content="Leia. Entenda. Aprenda. Aplicativo pessoal de leitura e estudo com IA.">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Leitor Inteligente">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- PDF.js para renderização de PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Barra Lateral (Desktop) -->
+        <aside class="sidebar desktop-only">
+            <div class="brand">
+                <h1>Leitor Inteligente</h1>
+                <p class="subtitle">Leia. Entenda. Aprenda.</p>
+            </div>
+            <nav class="nav-links">
+                <button class="nav-btn active" data-target="view-library">📚 Meus Livros</button>
+                <button class="nav-btn" data-target="view-favorites">⭐ Favoritos</button>
+                <button class="nav-btn" data-target="view-settings">⚙️ Configurações</button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="btn-install-desktop" class="btn-primary install-pwa-btn" style="display:none;">📲 Instalar App</button>
+                <p class="footer-text">©️ Alisson Salvador 2026</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- TELA 1: BIBLIOTECA -->
+            <section id="view-library" class="view active">
+                <header class="view-header">
+                    <h2>Meus Livros</h2>
+                    <button id="btn-add-pdf" class="btn-primary">+ Adicionar PDF</button>
+                    <input type="file" id="pdf-file-input" accept="application/pdf" style="display: none;">
+                </header>
+
+                <div class="search-filter-bar">
+                    <input type="text" id="search-library" placeholder="Pesquisar na biblioteca...">
+                </div>
+
+                <div id="library-grid" class="books-grid">
+                    <!-- Livros dinâmicos inseridos aqui -->
+                    <div class="empty-state">
+                        <p>Nenhum livro adicionado ainda.</p>
+                        <p class="hint">Clique em "+ Adicionar PDF" para começar seus estudos.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TELA 2: DETALHES E MÓDULOS DO LIVRO -->
+            <section id="view-book-detail" class="view">
+                <header class="view-header with-back">
+                    <button class="btn-back" data-target="view-library">← Voltar</button>
+                    <h2 id="detail-book-title">Título do Livro</h2>
+                </header>
+
+                <div class="book-detail-hero">
+                    <div class="book-meta-info">
+                        <p id="detail-book-author">Autor: Desconhecido</p>
+                        <div class="progress-container">
+                            <span>Progresso de leitura:</span>
+                            <div class="progress-bar"><div id="detail-read-progress" class="fill" style="width: 0%"></div></div>
+                            <span id="detail-read-percent">0%</span>
+                        </div>
+                    </div>
+                    <div class="book-action-bar">
+                        <button id="btn-open-reader" class="btn-primary">📖 Ler PDF</button>
+                        <button id="btn-analyze-book" class="btn-secondary">🧠 Analisar com IA</button>
+                    </div>
+                </div>
+
+                <!-- Abas / Módulos do Livro -->
+                <div class="book-tabs">
+                    <button class="tab-btn active" data-tab="tab-summary">Resumo</button>
+                    <button class="tab-btn" data-tab="tab-chapters">Capítulos</button>
+                    <button class="tab-btn" data-tab="tab-concepts">Conceitos</button>
+                    <button class="tab-btn" data-tab="tab-apps">Aplicações</button>
+                    <button class="tab-btn" data-tab="tab-chat">Perguntar</button>
+                    <button class="tab-btn" data-tab="tab-flashcards">Flashcards</button>
+                    <button class="tab-btn" data-tab="tab-quiz">Teste</button>
+                    <button class="tab-btn" data-tab="tab-audio">Ouvir 🎧</button>
+                    <button class="tab-btn" data-tab="tab-notes">Anotações</button>
+                </div>
+
+                <div class="book-tab-contents">
+                    <!-- Aba Resumo -->
+                    <div id="tab-summary" class="tab-pane active">
+                        <div class="quick-summary-buttons">
+                            <button class="btn-chip" id="btn-10min">⏱ O livro em 10 minutos</button>
+                            <button class="btn-chip" id="btn-2min">⚡ O livro em 2 minutos</button>
+                        </div>
+                        <div id="summary-content" class="content-box">
+                            <p>Clique em "Analisar com IA" para gerar o resumo geral e os estudos deste livro.</p>
+                        </div>
+                    </div>
+
+                    <!-- Aba Capítulos -->
+                    <div id="tab-chapters" class="tab-pane">
+                        <div id="chapters-list" class="accordion-list">
+                            <p class="hint">Nenhum capítulo processado ainda.</p>
+                        </div>
+                    </div>
+
+                    <!-- Aba Conceitos -->
+                    <div id="tab-concepts" class="tab-pane">
+                        <div id="concepts-list" class="cards-list">
+                            <p class="hint">Os conceitos fundamentais aparecerão aqui após a análise.</p>
+                        </div>
+                    </div>
+
+                    <!-- Aba Aplicações -->
+                    <div id="tab-apps" class="tab-pane">
+                        <div id="applications-list" class="cards-list">
+                            <p class="hint">Aplicações práticas da obra.</p>
+                        </div>
+                    </div>
+
+                    <!-- Aba Chat (Pergunte ao Livro) -->
+                    <div id="tab-chat" class="tab-pane chat-pane">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-msg ai">Olá! Sou seu assistente de leitura. Pergunte qualquer coisa sobre este livro.</div>
+                        </div>
+                        <div class="chat-input-bar">
+                            <input type="text" id="chat-input" placeholder="Pergunte qualquer coisa sobre este livro...">
+                            <button id="btn-send-chat" class="btn-primary">Enviar</button>
+                        </div>
+                    </div>
+
+                    <!-- Aba Flashcards -->
+                    <div id="tab-flashcards" class="tab-pane">
+                        <div id="flashcard-container" class="flashcard-box">
+                            <p class="hint">Nenhum flashcard gerado. Analise o livro para criá-los.</p>
+                        </div>
+                        <div class="flashcard-controls" id="flashcard-controls" style="display:none;">
+                            <button id="btn-fc-prev" class="btn-secondary">Anterior</button>
+                            <button id="btn-fc-flip" class="btn-primary">Revelar Resposta</button>
+                            <button id="btn-fc-next" class="btn-secondary">Próximo</button>
+                        </div>
+                    </div>
+
+                    <!-- Aba Teste -->
+                    <div id="tab-quiz" class="tab-pane">
+                        <button id="btn-generate-quiz" class="btn-primary" style="margin-bottom: 1rem;">Gerar Teste de Conhecimento</button>
+                        <div id="quiz-container"></div>
+                    </div>
+
+                    <!-- Aba Áudio -->
+                    <div id="tab-audio" class="tab-pane">
+                        <div class="audio-player-card">
+                            <h3>🎧 Leitura por Voz (Text-to-Speech)</h3>
+                            <p id="audio-status">Pronto para reproduzir o resumo do livro.</p>
+                            <div class="audio-controls-row">
+                                <button id="btn-audio-play" class="btn-primary">▶ Reproduzir</button>
+                                <button id="btn-audio-pause" class="btn-secondary">⏸ Pausar</button>
+                                <button id="btn-audio-stop" class="btn-secondary">⏹ Parar</button>
+                            </div>
+                            <div class="audio-speed-row">
+                                <label>Velocidade:</label>
+                                <select id="audio-speed-select">
+                                    <option value="0.75">0.75x</option>
+                                    <option value="1" selected>1x</option>
+                                    <option value="1.25">1.25x</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2">2x</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba Anotações -->
+                    <div id="tab-notes" class="tab-pane">
+                        <div class="note-creator">
+                            <textarea id="new-note-text" placeholder="Escreva sua anotação sobre o livro, capítulo ou página..."></textarea>
+                            <button id="btn-save-note" class="btn-primary">Salvar Anotação</button>
+                        </div>
+                        <div id="notes-list" class="notes-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TELA 3: LEITOR DE PDF INTEGRADO -->
+            <section id="view-reader" class="view">
+                <header class="reader-header">
+                    <button class="btn-back" id="btn-close-reader">✕ Fechar Leitor</button>
+                    <span id="reader-title-bar">Título do Livro</span>
+                    <div class="reader-tools">
+                        <button id="reader-zoom-out" title="Diminuir Zoom">🔍-</button>
+                        <span id="page-indicator">Página 1 / 1</span>
+                        <button id="reader-zoom-in" title="Aumentar Zoom">🔍+</button>
+                        <button id="reader-fullscreen" title="Tela Cheia">⛶</button>
+                    </div>
+                </header>
+                <div class="reader-canvas-container" id="reader-canvas-container">
+                    <canvas id="pdf-render-canvas"></canvas>
+                </div>
+                <footer class="reader-footer">
+                    <button id="reader-prev-page" class="btn-secondary">◀ Página Anterior</button>
+                    <button id="reader-next-page" class="btn-primary">Próxima Página ▶</button>
+                </footer>
+            </section>
+
+            <!-- TELA 4: FAVORITOS -->
+            <section id="view-favorites" class="view">
+                <header class="view-header">
+                    <h2>⭐ Favoritos</h2>
+                </header>
+                <div id="favorites-list" class="cards-list">
+                    <p class="hint">Nenhum item favoritado ainda.</p>
+                </div>
+            </section>
+
+            <!-- TELA 5: CONFIGURAÇÕES -->
+            <section id="view-settings" class="view">
+                <header class="view-header">
+                    <h2>⚙️ Configurações</h2>
+                </header>
+                <div class="settings-card">
+                    <div class="setting-item">
+                        <label>Tema Escuro / Claro</label>
+                        <input type="checkbox" id="theme-toggle-switch" checked>
+                    </div>
+                    <div class="setting-item">
+                        <label>Tamanho da Fonte da Leitura</label>
+                        <select id="setting-font-size">
+                            <option value="small">Pequena</option>
+                            <option value="medium" selected>Média</option>
+                            <option value="large">Grande</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Configuração de IA (API Endpoint / Modelo)</label>
+                        <input type="text" id="setting-ai-endpoint" placeholder="https://api.openai.com/v1 ou Gemini API">
+                    </div>
+                    <div class="setting-item column">
+                        <label>Backup e Restauração de Dados</label>
+                        <div class="backup-buttons">
+                            <button id="btn-export-backup" class="btn-secondary">Exportar Backup (.json)</button>
+                            <label for="import-backup-file" class="btn-secondary file-upload-label">Restaurar Backup</label>
+                            <input type="file" id="import-backup-file" accept=".json" style="display:none;">
+                        </div>
+                    </div>
+                    <div class="setting-item column">
+                        <label>Instalação do Aplicativo (PWA)</label>
+                        <button id="btn-install-settings" class="btn-primary install-pwa-btn" style="display:none;">Instalar Leitor Inteligente</button>
+                        <p id="install-instructions" class="hint">Se o botão não aparecer, adicione o app à tela inicial pelo menu do navegador.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Barra de Navegação Inferior (Mobile) -->
+        <nav class="bottom-nav mobile-only">
+            <button class="nav-btn active" data-target="view-library">📚 Livros</button>
+            <button class="nav-btn" data-target="view-favorites">⭐ Favoritos</button>
+            <button class="nav-btn" data-target="view-settings">⚙️ Ajustes</button>
+        </nav>
+    </div>
+
+    <!-- Modal de Custo / Confirmação de IA -->
+    <div id="ai-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card">
+            <h3>Processamento por Inteligência Artificial</h3>
+            <p>Este processo utilizará Inteligência Artificial e poderá consumir créditos/API. Escolha o nível de análise desejado:</p>
+            <div class="ai-options">
+                <label><input type="radio" name="ai-level" value="quick" checked> <strong>Resumo rápido</strong> — Menor consumo.</label>
+                <label><input type="radio" name="ai-level" value="full"> <strong>Resumo completo</strong> — Maior qualidade.</label>
+                <label><input type="radio" name="ai-level" value="deep"> <strong>Análise profunda</strong> — Processamento completo.</label>
+            </div>
+            <p class="privacy-warning">⚠️ Seu PDF será processado para gerar os recursos solicitados.</p>
+            <div class="modal-buttons">
+                <button id="btn-cancel-ai" class="btn-secondary">Cancelar</button>
+                <button id="btn-confirm-ai" class="btn-primary">Iniciar Análise</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal -->
+    <script src="app.js"></script>
+</body>
+</html>

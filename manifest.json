@@ -1,0 +1,21 @@
+{
+  "name": "Leitor Inteligente",
+  "short_name": "LeitorIA",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "description": "Leia. Entenda. Aprenda. Aplicativo pessoal de leitura e estudo com IA.",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
