@@ -1,4 +1,4 @@
-const CACHE_NAME = 'leitor-inteligente-v2';
+const CACHE_NAME = 'leitor-inteligente-v3';
 const APP_SHELL = [
   './',
   './index.html',
