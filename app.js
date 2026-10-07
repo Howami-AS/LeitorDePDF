@@ -557,22 +557,52 @@ function importBackup(e) {
 }
 
 // Instalação PWA
+function isAppInstalled() {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.matchMedia('(display-mode: fullscreen)').matches ||
+           window.navigator.standalone === true;
+}
+
+function setInstallButtonsVisible(visible) {
+    document.querySelectorAll('.install-pwa-btn').forEach(btn => {
+        btn.style.display = visible ? 'block' : 'none';
+    });
+}
+
 function setupPWAInstall() {
+    // Se já estiver rodando como aplicativo instalado, não mostrar o botão.
+    if (isAppInstalled()) {
+        setInstallButtonsVisible(false);
+        return;
+    }
+
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        document.querySelectorAll('.install-pwa-btn').forEach(btn => {
-            btn.style.display = 'block';
-            btn.addEventListener('click', () => {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Usuário aceitou a instalação.');
-                    }
-                    deferredPrompt = null;
-                });
-            });
+        setInstallButtonsVisible(true);
+    });
+
+    document.querySelectorAll('.install-pwa-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                alert('O navegador não disponibilizou a instalação automática. No Chrome, abra o menu ⋮ e escolha "Instalar aplicativo" ou "Adicionar à tela inicial".');
+                return;
+            }
+
+            deferredPrompt.prompt();
+            const choiceResult = await deferredPrompt.userChoice;
+            if (choiceResult.outcome === 'accepted') {
+                console.log('Usuário aceitou a instalação.');
+            }
+            deferredPrompt = null;
+            setInstallButtonsVisible(false);
         });
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        setInstallButtonsVisible(false);
+        console.log('Leitor Inteligente instalado com sucesso.');
     });
 }
 
